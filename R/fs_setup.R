@@ -83,28 +83,37 @@ get_fs <- function(
 
   # Construct the main command string
   if (!add_home) {
-    parts <- c(cmd, sh_file_cmd)
-    parts <- parts[nzchar(parts)]
-    return(paste(parts, collapse = "; "))
+    return(collapse_fs_cmd(c(cmd, sh_file_cmd)))
   }
 
-  paste(
-    c(
-      cmd,
-      sprintf(
-        "export FREESURFER_HOME=%s",
-        shQuote(freesurferdir)
-      ),
-      sh_file_cmd,
-      sprintf(
-        "export FSF_OUTPUT_FORMAT=%s",
-        get_fs_output()
-      ),
-      paste0(start_up_path, "/")
+  collapse_fs_cmd(c(
+    cmd,
+    sprintf(
+      "export FREESURFER_HOME=%s",
+      shQuote(freesurferdir)
     ),
-    collapse = "; ",
-    sep = "; "
-  )
+    sh_file_cmd,
+    sprintf(
+      "export FSF_OUTPUT_FORMAT=%s",
+      get_fs_output()
+    ),
+    paste0(start_up_path, "/")
+  ))
+}
+
+#' Join FreeSurfer command parts into a single shell string
+#'
+#' Drops empty parts and collapses the leading and doubled `;` separators
+#' that arise when an empty leading element or an already-`;`-terminated
+#' part (such as the `source ... || true ; ` env setup) is joined with
+#' `collapse = "; "`. Without this, the assembled command begins with a
+#' stray `;` (a bash syntax error) or contains `; ;` sequences.
+#' @noRd
+collapse_fs_cmd <- function(parts) {
+  parts <- parts[nzchar(parts)]
+  cmd <- paste(parts, collapse = "; ")
+  cmd <- gsub("[[:space:]]*(;[[:space:]]*)+", "; ", cmd)
+  sub("^[[:space:]]*;[[:space:]]*", "", cmd)
 }
 
 
