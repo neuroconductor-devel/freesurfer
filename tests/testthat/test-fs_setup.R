@@ -56,7 +56,9 @@ describe("get_fs", {
           source = "Default",
           value = "/valid/path"
         )
-        if (simplify) return(ret$value)
+        if (simplify) {
+          return(ret$value)
+        }
         ret
       },
       get_fs_license = function(simplify = FALSE) {
@@ -113,7 +115,9 @@ describe("get_fs", {
     local_mocked_bindings(
       get_fs_home = function(simplify = FALSE) {
         ret <- list(value = "/valid/path", exists = TRUE, source = "Default")
-        if (simplify) return(ret$value)
+        if (simplify) {
+          return(ret$value)
+        }
         ret
       },
       get_fs_license = function(simplify = FALSE) list(exists = TRUE),
@@ -127,11 +131,30 @@ describe("get_fs", {
     expect_false(grepl("source", cmd))
   })
 
+  it("does not emit a leading or doubled semicolon", {
+    local_mocked_bindings(
+      get_fs_home = function(simplify = FALSE) {
+        list(value = "/valid/path", exists = TRUE, source = "Default")
+      },
+      get_fs_license = function(simplify = FALSE) list(exists = TRUE),
+      get_fs_source = function(simplify = FALSE) {
+        list(exists = TRUE, value = "/valid/path/FreeSurferEnv.sh")
+      },
+      get_fs_output = function() "nii"
+    )
+    cmd <- get_fs("bin")
+
+    expect_false(grepl("^[[:space:]]*;", cmd))
+    expect_false(grepl(";[[:space:]]*;", cmd))
+  })
+
   it("errors on invalid bin_app argument", {
     local_mocked_bindings(
       get_fs_home = function(simplify = TRUE) {
         ret <- list(value = "/valid/path", exists = TRUE, source = "Default")
-        if (simplify) return(ret$value)
+        if (simplify) {
+          return(ret$value)
+        }
         ret
       },
       get_fs_license = mock_get_license
