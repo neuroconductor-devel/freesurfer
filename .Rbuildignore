@@ -26,3 +26,7 @@ Dockerfile
 vignettes/*.orig
 figure
 cache/
+^DESCRIPTION\.bak$
+^autoci\.yml$
+^autoci_pkgdown\.yml$
+^tic\.R$
